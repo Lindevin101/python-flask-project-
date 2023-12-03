@@ -1,7 +1,8 @@
 from peewee import *
 import datetime
+from flask import Flask, jsonify, request
 
-db = PostgresqlData('water', user='poowoo', password='123456', host='localhost', port=5432)
+db = PostgresqlDatabase('bottlewater', user='poowoo', password='123456', host='localhost', port=5432)
 
 class BaseModel(Model):
     class Meta:
@@ -11,10 +12,10 @@ class Bottle(BaseModel):
     brand = CharField()
     source = CharField()
     location = CharField()
-    rating = FloatField()
+    ph = FloatField()
 
 db.connect()
-db.drop_table([Bottle])
+db.drop_tables([Bottle])
 db.create_tables([Bottle])
 
 app = Flask(__name__)
@@ -37,23 +38,23 @@ def bottle_endpoint(id):
         brand = data.get('brand')
         source = data.get('source')
         location = data.get('location')
-        rating = data.get('rating')
-        if not all([brand, source, location, rating]):
+        ph = data.get('ph')
+        if not all([brand, source, location, ph]):
             return jsonify({'error': 'Invalid data'}), 400
-        bottle = Bottle.create(brand=brand, source=source, location=location, rating=rating)
+        bottle = Bottle.create(brand=brand, source=source, location=location, ph=ph)
         return jsonify(model_to_dict(bottle)), 201
     elif request.method == 'PUT':
         data = request.get_json()
         brand = data.get('brand')
         source = data.get('source')
         location = data.get('location')
-        rating = data.get('rating')
-        if not all([brand, source, location, rating]):
+        ph = data.get('ph')
+        if not all([brand, source, location, ph]):
             return jsonify({'error': 'Invalid data'}), 400
         bottle.brand = brand
         bottle.source = source
         bottle.location = location
-        bottle.rating = rating
+        bottle.ph = ph
         bottle.save()
         return jsonify(model_to_dict(bottle)), 200
     elif request.method == 'DELETE':
